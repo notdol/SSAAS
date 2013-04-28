@@ -1,0 +1,121 @@
+<html>
+<head>
+	<title>View generator</title>
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone-min.js"></script>
+	<script type="text/javascript" src="js/backbone-form.min.js"></script>
+	<script type="text/javascript" src="js/backbone-form-list.js"></script>
+	<script type="text/javascript" src="js/jquery.jqGrid.min.js"></script>
+<script type="text/javascript">
+var hostname = "http://www.notdol.com";
+var port = "2403"
+var collectionName = "programming";
+
+var url = hostname +":"+port+"/"+collectionName;
+
+var form;
+
+
+function getSchema(body){
+  var schema = {};
+
+  var length = body.length > 1 ? 1 : body.length;
+
+  for (var i= 0 ; i< length;i++){
+    var obj = body[i];
+    for(var k in obj){
+      schema[k] = { type: defineType(obj[k])  };
+    }
+  }
+  return schema;
+}
+
+function defineType(target){
+  switch(target.constructor){
+    case String:
+      // .... String .. number .. .... ...
+      return 'String';
+    break;
+
+    case Number:
+      return 'Number';
+    break;
+
+    case Array:
+      return 'Array';
+    break;
+
+    case Boolean:
+      return 'Boolean';
+    break;
+
+    case Object:
+      return 'Object';
+    break;
+  }
+}
+	var typebinding = {
+		"String" : "Text"
+		,"Number" : "Text"
+		,"Array" : "List"
+		,"Boolean" : "Checkboxes"
+		,"Object" : "Object"
+	};
+
+var schema;
+	$.ajax({
+	  "url": url
+	}).done(function ( data ) {
+	  if( console && console.log ) {
+      //var data = JSON.parse(data);
+    	schema = getSchema(data);
+	  }
+		
+		for(var k in schema){
+			for(var sk in typebinding){
+				if(schema[k].type == sk){
+					schema[k].type = typebinding[sk];
+					if(k == 'id')schema[k].validators = ["required"];
+				}
+			}
+		}
+		console.log(schema);
+
+var User = Backbone.Model.extend({
+    "schema": schema
+});
+		var user = new User();
+
+		form = new Backbone.Form({
+		    model: user
+		}).render();
+
+		$('#master').append(form.el);
+	});
+
+	$(document).ready(function(){
+		$('#submit').click(function(){
+		var sendData = JSON.stringify( form.getValue() );
+		$.ajax({
+		     contentType: "application/json; charset=utf-8", dataType: "json"
+			,'url': url, 'type' : "POST"	,data: sendData
+			,success: function(data){
+	    	   	alert('success');
+			}	
+		});
+
+
+
+		});
+	});
+
+</script>
+</head>
+<body>
+	<div id="master"></div>
+	<div>
+		<button id="submit" type="button">Click Me!</button>
+	</div>
+</body>
+</html>

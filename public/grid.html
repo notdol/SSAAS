@@ -1,0 +1,72 @@
+<html>
+<head>
+	<title>Grid View Generator</title>
+	<link rel="stylesheet" type="text/css" href="css/jqgrid/jquery-ui-custom.css">
+	<link rel="stylesheet" type="text/css" href="css/ui.jqgrid.css">
+	<link rel="stylesheet" type="text/css" href="css/jqgrid/ui.multiselect.css">
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script type="text/javascript" src="js/jquery.jqGrid.min.js"></script>
+	<script type="text/javascript" src="js/grid.locale-en.js"></script>
+<script type="text/javascript">
+
+ 	function createColumnModel(schema){
+ 		var colModel= [], colNames=[];
+
+ 		for(var k in schema){
+ 			var obj = {};
+ 			obj.name = k;
+ 			obj.index = k;
+ 			obj.width = 100;
+ 			colNames.push(k);
+ 			colModel.push(obj);
+ 		}
+ 		console.log(colModel);
+ 		return {'colModel': colModel, 'colNames': colNames};
+ 	}
+
+	$(document).ready(function(){
+		var schema = {
+			home: 'String',
+			language: 'String',
+			name: 'String',
+			tag: 'Array',
+			type: 'Array'
+		};
+
+		var gridCol = createColumnModel(schema);
+
+
+		jQuery("#list2").jqGrid({
+		   	url:'http://localhost:4001/url/programming',
+			datatype: "json",
+		   	colNames: gridCol.colNames,
+		   	colModel: gridCol.colModel,
+		   	rowNum:5,
+		   	rowList:[10,20,30],
+		   	pager: '#pager2',
+		   	sortname: 'id',
+		    viewrecords: true,
+		    sortorder: "desc",
+		    caption:"JSON Example"
+		});
+		jQuery("#list2").jqGrid('navGrid','#pager2',{edit:false,add:false,del:false});
+
+	$.ajax({
+	  "url": "http://localhost:2403/programming"
+	}).done(function ( data ) {
+
+	});
+
+	})
+
+
+
+</script>
+</head>
+<body>
+<table id="list2"></table>
+<div id="pager2"></div>
+
+
+</body>
+</html>
